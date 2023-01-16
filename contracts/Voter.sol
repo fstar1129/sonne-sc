@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import 'contracts/libraries/Math.sol';
-import 'contracts/interfaces/IBribe.sol';
-import 'contracts/interfaces/IBribeFactory.sol';
-import 'contracts/interfaces/IGauge.sol';
-import 'contracts/interfaces/IGaugeFactory.sol';
-import 'contracts/interfaces/IERC20.sol';
-import 'contracts/interfaces/IMinter.sol';
-import 'contracts/interfaces/IPair.sol';
-import 'contracts/interfaces/IPairFactory.sol';
-import 'contracts/interfaces/IVoter.sol';
-import 'contracts/interfaces/IVotingEscrow.sol';
+import './libraries/Math.sol';
+import './interfaces/IBribe.sol';
+import './interfaces/IBribeFactory.sol';
+import './interfaces/IGauge.sol';
+import './interfaces/IGaugeFactory.sol';
+import './interfaces/IERC20.sol';
+import './interfaces/IMinter.sol';
+import './interfaces/IPair.sol';
+import './interfaces/IPairFactory.sol';
+import './interfaces/IVoter.sol';
+import './interfaces/IVotingEscrow.sol';
 
 contract Voter is IVoter {
 
