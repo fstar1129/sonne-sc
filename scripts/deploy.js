@@ -47,6 +47,8 @@ async function main() {
     console.log(this.sonne.address);
     console.log("LiquidityGenerator: ",this.LiquidityGenerator.address);
     console.log("Distributor: ",this.OwnedDistributor.address);
+    await this.OwnedDistributor.setAdmin(this.LiquidityGenerator.address);
+    await this.vestigSale.setRecipient(this.OwnedDistributor.address);
     // console.log(`RUM contract: ${this.rumContract.address}`);
     // console.log(`USDC contract: ${this.usdcContract.address}`);
 }
