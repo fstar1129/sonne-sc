@@ -8,6 +8,8 @@ import './interfaces/IGauge.sol';
 import './interfaces/IPair.sol';
 import './interfaces/IVoter.sol';
 import './interfaces/IVotingEscrow.sol';
+import "hardhat/console.sol";
+
 
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
 contract Gauge is IGauge {
@@ -213,7 +215,7 @@ contract Gauge is IGauge {
     }
 
     function getPriorRewardPerToken(address token, uint timestamp) public view returns (uint, uint) {
-        uint nCheckpoints = rewardPerTokenNumCheckpoints[token];
+        uint nCheckpoints = rewardPerTokenNumCheckpoints[token]; 
         if (nCheckpoints == 0) {
             return (0,0);
         }
@@ -292,11 +294,9 @@ contract Gauge is IGauge {
         require(msg.sender == account || msg.sender == voter);
         _unlocked = 1;
         IVoter(voter).distribute(address(this));
-        _unlocked = 2;
-
+        _unlocked = 2; 
         for (uint i = 0; i < tokens.length; i++) {
             (rewardPerTokenStored[tokens[i]], lastUpdateTime[tokens[i]]) = _updateRewardPerToken(tokens[i], type(uint).max, true);
-
             uint _reward = earned(tokens[i], account);
             lastEarn[tokens[i]][account] = block.timestamp;
             userRewardPerTokenStored[tokens[i]][account] = rewardPerTokenStored[tokens[i]];
@@ -438,7 +438,7 @@ contract Gauge is IGauge {
                 Checkpoint memory cp0 = checkpoints[account][i];
                 Checkpoint memory cp1 = checkpoints[account][i+1];
                 (uint _rewardPerTokenStored0,) = getPriorRewardPerToken(token, cp0.timestamp);
-                (uint _rewardPerTokenStored1,) = getPriorRewardPerToken(token, cp1.timestamp);
+                (uint _rewardPerTokenStored1,) = getPriorRewardPerToken(token, cp1.timestamp); 
                 reward += cp0.balanceOf * (_rewardPerTokenStored1 - _rewardPerTokenStored0) / PRECISION;
             }
         }
@@ -446,7 +446,7 @@ contract Gauge is IGauge {
         Checkpoint memory cp = checkpoints[account][_endIndex];
         (uint _rewardPerTokenStored,) = getPriorRewardPerToken(token, cp.timestamp);
         reward += cp.balanceOf * (rewardPerToken(token) - Math.max(_rewardPerTokenStored, userRewardPerTokenStored[token][account])) / PRECISION;
-
+        
         return reward;
     }
 

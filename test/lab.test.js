@@ -40,6 +40,9 @@ describe("Lab", () => {
         this.Usdc = await UsdcFactory.deploy();
         const VeloFactory = await ethers.getContractFactory("Velo");
         this.velo = await VeloFactory.deploy();
+        await this.velo.initialMint(owner.address);
+        
+        
         const PairFactory = await ethers.getContractFactory("PairFactory");
         this.factory = await PairFactory.deploy();
         const GaugeFactory = await ethers.getContractFactory("GaugeFactory");
@@ -53,6 +56,11 @@ describe("Lab", () => {
         const VoterFactory = await ethers.getContractFactory("Voter");
         this.Voter = await VoterFactory.deploy(this.VotingEscrow.address, this.factory.address, this.gauge.address, this.bribes.address);
 
+        const RewardsDistributorFactory = await ethers.getContractFactory("RewardsDistributor");
+        this.RewardsDistributor = await RewardsDistributorFactory.deploy(this.VotingEscrow.address);
+        const MinterFactory = await ethers.getContractFactory("Minter");
+        this.minter = await MinterFactory.deploy(this.Voter.address, this.VotingEscrow.address, this.RewardsDistributor.address);
+        this.velo.setMinter(this.minter.address);
         const WETH9Factory = await ethers.getContractFactory("WETH9");
         this.WETH9 = await WETH9Factory.deploy();
         const RouterFactory = await ethers.getContractFactory("Router");
@@ -88,6 +96,15 @@ describe("Lab", () => {
         }
         await this.sonne.transfer(this.LiquidityGenerator.address, LGEAmount)
         await this.sonne.transfer(this.vestigSale.address, vestingAmount)
+
+        await this.VotingEscrow.setVoter(this.Voter.address);
+        await this.Voter.initialize([this.velo.address], this.minter.address);
+        
+        const gaugeAddress = await this.LiquidityGenerator.gauge();
+        const GauegeInstanceFactory = await ethers.getContractFactory("Gauge");
+        this.gaugeInstance = await GauegeInstanceFactory.attach(gaugeAddress);
+        await this.velo.approve(this.gaugeInstance.address,ethers.utils.parseEther("20") )
+        await this.gaugeInstance.notifyRewardAmount(this.velo.address, ethers.utils.parseEther("20"));
     });
 
 
@@ -149,5 +166,23 @@ describe("Lab", () => {
         const vestingBalance = parseFloat(ethers.utils.formatEther(balance))
         const totalSum = parseFloat(ethers.utils.formatEther(sum))
         expect(vestingBalance).to.be.closeTo(totalSum, 0.1);
+    })
+
+    it("Veldrome Token interaction", async () => {
+        const value = ethers.utils.parseEther("200");
+        const fourWeek = oneDay * 7 * 4;
+        await this.velo.approve(this.VotingEscrow.address, value);
+        let tx = await this.VotingEscrow.create_lock(value, fourWeek);
+        const { events } = await tx.wait()
+        const args = events.map(event=> event.args)
+        const tokenId = args[0].tokenId;
+        const pools = [this.lpToken.address];
+        const weights = ["10000"];
+        tx = await this.Voter.vote(tokenId, pools, weights);
+        const lgBalanceBefore = await this.velo.balanceOf(owner.address);
+        await increaseTime(fourWeek)
+        tx = await this.LiquidityGenerator.claimVeloRewards() 
+        const lgBalanceAfter = await this.velo.balanceOf(owner.address); 
+        console.log(ethers.utils.formatEther(lgBalanceAfter.sub(lgBalanceBefore))); 
     })
 })
