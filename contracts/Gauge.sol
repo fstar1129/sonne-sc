@@ -8,8 +8,6 @@ import './interfaces/IGauge.sol';
 import './interfaces/IPair.sol';
 import './interfaces/IVoter.sol';
 import './interfaces/IVotingEscrow.sol';
-import "hardhat/console.sol";
-
 
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
 contract Gauge is IGauge {

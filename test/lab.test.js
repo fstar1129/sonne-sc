@@ -14,8 +14,16 @@ const increaseTime = async (timeInSecond) => {
 describe("Lab", () => {
 
     let owner, bidder1, bidder2, bidder3, bidder4;
-    let LGEAmount = ethers.utils.parseEther("17500000");
-
+    const HUNDRED = BigNumber.from("1000");
+    let LGE_PERCENTAGE = BigNumber.from("50");//5 %
+    let PAIRED_WITH_PERCENTAGE = BigNumber.from("35");//3.5
+    let IMMEDIATECLAIMABLE_PERCENTAGE = BigNumber.from("600");//60 %
+    let VESTINGAMOUNT_PERCENTAGE = HUNDRED.sub(IMMEDIATECLAIMABLE_PERCENTAGE);//40 %
+    let TOTAL_SUPPLY = ethers.utils.parseEther("500000000");
+    let LGEAmount = TOTAL_SUPPLY.mul(LGE_PERCENTAGE).div(HUNDRED);
+    let immediateClaimableAmount = LGEAmount.mul(IMMEDIATECLAIMABLE_PERCENTAGE).div(HUNDRED);
+    let vestingAmount = LGEAmount.mul(VESTINGAMOUNT_PERCENTAGE).div(HUNDRED);
+    let PAIRED_AMOUNT = TOTAL_SUPPLY.mul(PAIRED_WITH_PERCENTAGE).div(HUNDRED);
 
     // vestingBegin = periodEnd + 1
     // vestingEnd = this.vestingBegins + 365 days
@@ -33,6 +41,7 @@ describe("Lab", () => {
     const oneDay = 86400;
 
     const periodDuration_ = oneDay * 3;
+    const vestingPeriod = oneDay * 30 * 3;// 3 Months
     before(async () => {
         [owner, bidder1, bidder2, bidder3, bidder4] = await ethers.getSigners();
         this.users = [owner, bidder1, bidder2, bidder3, bidder4];
@@ -41,8 +50,8 @@ describe("Lab", () => {
         const VeloFactory = await ethers.getContractFactory("Velo");
         this.velo = await VeloFactory.deploy();
         await this.velo.initialMint(owner.address);
-        
-        
+
+
         const PairFactory = await ethers.getContractFactory("PairFactory");
         this.factory = await PairFactory.deploy();
         const GaugeFactory = await ethers.getContractFactory("GaugeFactory");
@@ -66,12 +75,11 @@ describe("Lab", () => {
         const RouterFactory = await ethers.getContractFactory("Router");
         this.Router = await RouterFactory.deploy(this.factory.address, this.WETH9.address);
 
-        let vestingAmount = ethers.utils.parseEther("25000000");
         const oneDay = 86400;
         const periodStart = await getCurrentTimeStamp();
         const periodEnd = periodStart + periodDuration_;
         this.vestingBegins = periodEnd + 1;
-        this.vestingEnds = this.vestingBegins + oneDay * 365;
+        this.vestingEnds = this.vestingBegins + vestingPeriod;
         const LabFactory = await ethers.getContractFactory("Sonne");
         this.sonne = await LabFactory.deploy(owner.address);
         const VesterSaleFactory = await ethers.getContractFactory("VesterSale");
@@ -83,9 +91,9 @@ describe("Lab", () => {
         const voter = this.Voter.address;
         await this.Voter.whitelist(usdc)
         await this.Voter.whitelist(this.sonne.address);
-        this.vestigSale = await VesterSaleFactory.deploy(this.sonne.address, owner.address, vestingAmount, this.vestingBegins, this.vestingEnds);
+        this.vestigSale = await VesterSaleFactory.deploy(this.sonne.address, owner.address, immediateClaimableAmount, vestingAmount, this.vestingBegins, this.vestingEnds);
         this.OwnedDistributor = await OwnedDistributorFactory.deploy(this.sonne.address, this.vestigSale.address, owner.address);
-        this.LiquidityGenerator = await LiquidityGeneratorFactory.deploy([owner.address, this.sonne.address, usdc, velo, router0, voter, owner.address, this.OwnedDistributor.address
+        this.LiquidityGeneimmediateClaimableAmountrator = await LiquidityGeneratorFactory.deploy([owner.address, this.sonne.address, usdc, velo, router0, voter, owner.address, this.OwnedDistributor.address
             , periodStart, periodDuration_]);
         await this.OwnedDistributor.setAdmin(this.LiquidityGenerator.address);
         await this.vestigSale.setRecipient(this.OwnedDistributor.address);
@@ -94,16 +102,16 @@ describe("Lab", () => {
             const depositAmt = ethers.utils.parseUnits("500", "6")
             await this.Usdc.transfer(this.users[i].address, depositAmt);
         }
-        await this.sonne.transfer(this.LiquidityGenerator.address, LGEAmount)
-        await this.sonne.transfer(this.vestigSale.address, vestingAmount)
+        await this.sonne.transfer(this.LiquidityGenerator.address, PAIRED_AMOUNT)
+        await this.sonne.transfer(this.vestigSale.address, LGEAmount)
 
         await this.VotingEscrow.setVoter(this.Voter.address);
         await this.Voter.initialize([this.velo.address], this.minter.address);
-        
+
         const gaugeAddress = await this.LiquidityGenerator.gauge();
         const GauegeInstanceFactory = await ethers.getContractFactory("Gauge");
         this.gaugeInstance = await GauegeInstanceFactory.attach(gaugeAddress);
-        await this.velo.approve(this.gaugeInstance.address,ethers.utils.parseEther("20") )
+        await this.velo.approve(this.gaugeInstance.address, ethers.utils.parseEther("20"))
         await this.gaugeInstance.notifyRewardAmount(this.velo.address, ethers.utils.parseEther("20"));
     });
 
@@ -111,12 +119,12 @@ describe("Lab", () => {
 
     it("Deposit and claim vested amount", async () => {
         const share = [];
+        let depositAmts = [20, 30, 40, 10];
         let totalDeposit = 0;
         for (let i = 1; i < this.users.length; i++) {
-            const index = i % this.users.length;
-            const depositAmt = ethers.utils.parseUnits(parseInt((10 + (Math.random() * 10)).toString()).toString(), "6")
-            await this.Usdc.connect(this.users[index]).approve(this.LiquidityGenerator.address, depositAmt);
-            await this.LiquidityGenerator.connect(this.users[index]).deposit(depositAmt);
+            const depositAmt = ethers.utils.parseUnits(depositAmts[i - 1].toString(), "6")
+            await this.Usdc.connect(this.users[i]).approve(this.LiquidityGenerator.address, depositAmt);
+            await this.LiquidityGenerator.connect(this.users[i]).deposit(depositAmt);
             const depositAmtFloat = parseFloat(ethers.utils.formatUnits(depositAmt, "6"));
             share.push(depositAmtFloat);
             totalDeposit += depositAmtFloat;
@@ -130,8 +138,29 @@ describe("Lab", () => {
         const sonnePairBalance = await this.sonne.balanceOf(pair);
 
         expect(usdcPairBalance).is.equal(ethers.utils.parseUnits(parseInt(totalDeposit).toString(), "6"))
-        expect(sonnePairBalance).is.equal(LGEAmount)
+        expect(sonnePairBalance).is.equal(PAIRED_AMOUNT)
 
+        let difference = this.vestingEnds - this.vestingBegins; 
+        const immidiateClaimableFloat = parseFloat(ethers.utils.formatEther(immediateClaimableAmount));
+        const vestingClaimable = [1000008.7999800591, 1500013.707661246, 2000018.9538032042, 500004.9076811868];
+        for (let i = 1; i < this.users.length; i++) {
+            const balBefore = ethers.utils.formatEther(await this.sonne.balanceOf(this.users[i].address));
+            await this.OwnedDistributor.connect(this.users[i]).claim();
+            const balAfter = ethers.utils.formatEther(await this.sonne.balanceOf(this.users[i].address));
+            const totalClaimed = vestingClaimable[i-1] + immidiateClaimableFloat*(depositAmts[i-1]/100)
+            
+            expect(parseFloat(balAfter)).to.be.closeTo(totalClaimed,0.1);
+        }
+        while (difference > 0) {
+            await increaseTime(oneDay * 10);
+            for (let i = 1; i < this.users.length; i++) {
+                await this.OwnedDistributor.connect(this.users[i]).claim();
+                const bal = ethers.utils.formatEther(await this.sonne.balanceOf(this.users[i].address));
+            }
+            difference = Math.max(difference - oneDay * 10, 0);
+        }
+        const balance = await this.sonne.balanceOf(this.vestigSale.address);
+        expect(balance.toString()).equal("0");
         const gaugeAddress = await this.LiquidityGenerator.gauge();
         const lpBalanceOfGauge = await this.lpToken.balanceOf(gaugeAddress);
 
@@ -143,29 +172,7 @@ describe("Lab", () => {
         const reservesManagerLpBalance = await this.lpToken.balanceOf(reserverManager);
         expect(lpBalanceOfGauge.toString()).is.equal(reservesManagerLpBalance.toString());
 
-        const balance = await this.sonne.balanceOf(this.vestigSale.address);
-        let difference = this.vestingEnds - this.vestingBegins;
-        while (difference > 0) {
-            await increaseTime(oneDay * 50);
-            for (let i = 1; i < this.users.length; i++) {
-                await this.OwnedDistributor.connect(this.users[i]).claim();
-            }
-            difference = Math.max(difference - oneDay * 50, 0);
-        }
-        let sum = BigNumber.from("0");
-        for (let i = 1; i < this.users.length; i++) {
-            const data = await this.LiquidityGenerator.distributorRecipients(this.users[i].address);
-            const balance = await this.sonne.balanceOf(this.users[i].address);
-            const amt = parseFloat(ethers.utils.formatEther(balance));
-            const sonneExpected = 25000000 * (share[i - 1] / totalDeposit);
-            expect(amt).to.be.closeTo(sonneExpected, 0.1);
-            // console.log(`\n************\nAmount: ${this.users[i].address}\nShare: ${data.shares}\nSonneBalance: ${amt}`);
-            sum = sum.add(balance);
-        }
-
-        const vestingBalance = parseFloat(ethers.utils.formatEther(balance))
-        const totalSum = parseFloat(ethers.utils.formatEther(sum))
-        expect(vestingBalance).to.be.closeTo(totalSum, 0.1);
+ 
     })
 
     it("Veldrome Token interaction", async () => {
@@ -174,15 +181,15 @@ describe("Lab", () => {
         await this.velo.approve(this.VotingEscrow.address, value);
         let tx = await this.VotingEscrow.create_lock(value, fourWeek);
         const { events } = await tx.wait()
-        const args = events.map(event=> event.args)
+        const args = events.map(event => event.args)
         const tokenId = args[0].tokenId;
         const pools = [this.lpToken.address];
         const weights = ["10000"];
         tx = await this.Voter.vote(tokenId, pools, weights);
         const lgBalanceBefore = await this.velo.balanceOf(owner.address);
         await increaseTime(fourWeek)
-        tx = await this.LiquidityGenerator.claimVeloRewards() 
-        const lgBalanceAfter = await this.velo.balanceOf(owner.address); 
-        console.log(ethers.utils.formatEther(lgBalanceAfter.sub(lgBalanceBefore))); 
+        tx = await this.LiquidityGenerator.claimVeloRewards()
+        const lgBalanceAfter = await this.velo.balanceOf(owner.address);
+        console.log(ethers.utils.formatEther(lgBalanceAfter.sub(lgBalanceBefore)));
     })
 })

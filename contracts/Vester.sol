@@ -51,7 +51,7 @@ contract Vester is IVester, IClaimable {
     }
 
     function getUnlockedAmount() internal virtual returns (uint256 amount) {
-        uint256 blockTimestamp = getBlockTimestamp();
+        uint256 blockTimestamp = getBlockTimestamp(); 
         uint256 currentPoint = vestingCurve((blockTimestamp - vestingBegin).mul(1e18).div(vestingEnd - vestingBegin));
         amount = vestingAmount.mul(currentPoint.sub(previousPoint)).div(finalPoint);
         previousPoint = currentPoint;
@@ -61,10 +61,10 @@ contract Vester is IVester, IClaimable {
         require(msg.sender == recipient, 'Vester: UNAUTHORIZED');
         uint256 blockTimestamp = getBlockTimestamp();
         if (blockTimestamp < vestingBegin) return 0;
-        if (blockTimestamp > vestingEnd) {
+        if (blockTimestamp > vestingEnd) { 
             amount = ISonne(sonne).balanceOf(address(this));
         } else {
-            amount = getUnlockedAmount();
+            amount = getUnlockedAmount(); 
         }
         if (amount > 0) ISonne(sonne).transfer(recipient, amount);
     }

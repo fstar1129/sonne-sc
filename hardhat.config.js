@@ -45,7 +45,7 @@ module.exports = {
       accounts: dev ? [dev] : dev
     }, 
     bsctestnet: {
-      url: 'https://data-seed-prebsc-2-s2.binance.org:8545',
+      url: 'https://data-seed-prebsc-1-s3.binance.org:8545',
       accounts: dev ? [dev] : dev,
       gas: 2100000,
       gasPrice: 10000000000, //ethers.utils.parseUnits('1.2', 'gwei').toNumber(),
@@ -58,8 +58,8 @@ module.exports = {
     },
   },
   etherscan: {
-    // apiKey: "T4A58D6AI7PPUBT8IXP16PSQY9V67WJ41R"
-    apiKey: "TRG7E3JX6GJI6XKYIXNC7F353VXGJG84R1"
+    apiKey: "T4A58D6AI7PPUBT8IXP16PSQY9V67WJ41R"
+    // apiKey: "TRG7E3JX6GJI6XKYIXNC7F353VXGJG84R1"
   },
   mocha: {
     timeout: 5 * 60 * 10000,

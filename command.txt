@@ -1,19 +1,37 @@
 
-npx hardhat verify 0xD1a3178CF4DC4246A7BD1b4ceD1aA4d36A2DC891 --network mumbai
-npx hardhat verify 0x6b3cBbE5644F941F260f8aD5238a0eB43F154d35 --network mumbai
-npx hardhat verify 0x99CD0654E9c55f07919593F52Ccc4993fe9f25dA --network mumbai
-npx hardhat verify 0x2e55C9B254296701c20Ced571C0172ec79Cff5d6 --network mumbai
-npx hardhat verify 0x8771102E72aeb81BFB74007C96F78702631E1e6f --network mumbai
-npx hardhat verify 0x6eFE83f9c744B635a82405cb514BeE9cEb96df9D --network mumbai
-npx hardhat --constructor-args VotingEscrow.js verify 0x1e624756788A71F5D3043e1191Ad76814f5b3046 --network mumbai
-npx hardhat verify 0xc88366B807390ECad7013a3d8bb8C78DC836874e --network mumbai
-npx hardhat verify 0x7187F147C4b07798532e57db94165Bc472C49d02 --network mumbai
-npx hardhat --constructor-args Voter.js verify 0xC85F643a724F3D4138B64D192D565eabd7e86685 --network mumbai
-npx hardhat --constructor-args RewardsDistributor.js verify 0x4088641a316C9e795f73015C221B1e852Decb19F --network mumbai
-npx hardhat --constructor-args Minter.js verify 0x81A876Bb3D7d42Ef3F5752C8462513f2129325A0 --network mumbai
-npx hardhat verify 0xaD5caD541C25b325e6378595215f3dAAE26f0321 --network mumbai
-npx hardhat --constructor-args Router.js verify 0x58091525389983Fa28FF19115178101390833172 --network mumbai
-npx hardhat --constructor-args Sonne.js verify 0xe0A7f81Eaf7Ddd0511fe90a96DD0eE9B2b269Be5 --network mumbai
-npx hardhat --constructor-args VesterSale.js verify 0x025d0bBAfB3368f74223c1FC86515252d25d9D01 --network mumbai
-npx hardhat --constructor-args OwnedDistributor.js verify 0xE398c0761384Fb4F358B160bB692846729434A40 --network mumbai
-npx hardhat --constructor-args LiquidityGenerator.js verify 0x02619F663e3bB17DF2Af494409087272749D70eF --network mumbai
+Usdc
+npx hardhat verify 0x5FbDB2315678afecb367f032d93F642f64180aa3 --network hardhat
+Velo
+npx hardhat verify 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 --network hardhat
+PairFactory
+npx hardhat verify 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 --network hardhat
+GaugeFactory
+npx hardhat verify 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9 --network hardhat
+BribeFactory
+npx hardhat verify 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707 --network hardhat
+VeArtProxy
+npx hardhat verify 0x0165878A594ca255338adfa4d48449f69242Eb8F --network hardhat
+VotingEscrow
+npx hardhat verify --constructor-args VotingEscrow.js 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853 --network hardhat
+PairFactory
+npx hardhat verify 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6 --network hardhat
+BribeFactory
+npx hardhat verify 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318 --network hardhat
+Voter
+npx hardhat verify --constructor-args Voter.js 0x610178dA211FEF7D417bC0e6FeD39F05609AD788 --network hardhat
+RewardsDistributor
+npx hardhat verify --constructor-args RewardsDistributor.js 0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e --network hardhat
+Minter
+npx hardhat verify --constructor-args Minter.js 0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0 --network hardhat
+WETH9
+npx hardhat verify 0x9A676e781A523b5d0C0e43731313A708CB607508 --network hardhat
+Router
+npx hardhat verify --constructor-args Router.js 0x0B306BF915C4d645ff596e518fAf3F9669b97016 --network hardhat
+Sonne
+npx hardhat verify --constructor-args Sonne.js 0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1 --network hardhat
+VesterSale
+npx hardhat verify --constructor-args VesterSale.js 0x3Aa5ebB10DC797CAC828524e59A333d0A371443c --network hardhat
+OwnedDistributor
+npx hardhat verify --constructor-args OwnedDistributor.js 0xc6e7DF5E7b4f2A278906862b61205850344D4e7d --network hardhat
+LiquidityGenerator
+npx hardhat verify --constructor-args LiquidityGenerator.js 0x59b670e9fA9D0A427751Af201D676719a970857b --network hardhat
