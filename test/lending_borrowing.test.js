@@ -18,14 +18,15 @@ describe("Lending Borrowing", () => {
     const multiplierPerYear = "49999999975142400";
     const jumpMultiplierPerYear = "1364999999973552000";
     const kink_ = "800000000000000000";
-    const name_ = "JumpRateModelV4";
+    const name_ = "JumpRateModelV4"
+    const e18 = 1000000000000000000;
     // https://docs.chain.link/data-feeds/price-feeds/addresses?network=bnb-chain#BNB%20Chain%20Testnet
     const USDCOracle = "0x572dDec9087154dC5dfBB1546Bb62713147e0Ab0";
     const initialExchangeRateMantissa_ = ethers.utils.parseEther("1");
     const collateralFactorMantissa_ = "800000000000000000";
     before(async () => {
         [owner, bidder1, bidder2, bidder3, bidder4] = await ethers.getSigners();
-        this.users = [owner, bidder1, bidder2, bidder3, bidder4];
+        this.users = [owner, bidder1, bidder2, bidder3, bidder4]; 
         const UnitrollerFactory = await ethers.getContractFactory("Unitroller");
         this.Unitroller = await UnitrollerFactory.deploy();
         const ComptrollerFactory = await ethers.getContractFactory("Comptroller");
@@ -46,34 +47,58 @@ describe("Lending Borrowing", () => {
         await this.CErc20Immutable._setReserveFactor("100000000000000000")
         await this.Unitroller._supportMarket(this.CErc20Immutable.address);
         await this.Unitroller._setCollateralFactor(this.CErc20Immutable.address, collateralFactorMantissa_);
+        await this.Usdc.transfer(bidder1.address, "500000");
     })
-    // it("Mint", async () => {
-    //     await this.Usdc.approve(this.CErc20Immutable.address, "500000")
-    //     await this.CErc20Immutable.mint("500000");
-    //     const bal = await this.CErc20Immutable.balanceOf(owner.address)
-    //     expect(bal.toString()).is.equal("500000");
-    // })
-    // it("CollateralFactor", async () => {
-    //     const { collateralFactorMantissa } = await this.Unitroller.markets(this.CErc20Immutable.address);
-    //     expect(collateralFactorMantissa.toString()).is.equal(collateralFactorMantissa_);
-    //     console.log(`Collateral: ${ethers.utils.formatEther(collateralFactorMantissa)}`);
-    // })
-    // it("borrow", async () => {
-    //     const balBefore = await this.Usdc.balanceOf(owner.address)
-    //     await this.CErc20Immutable.borrow("200000");
-    //     const bal = await this.Usdc.balanceOf(owner.address)
-    //     const borrowedBalance = await this.CErc20Immutable.borrowBalanceStored(owner.address);
 
-    //     expect(borrowedBalance.toString()).is.equal("200000");
-    //     expect(bal.sub(balBefore).toString()).is.equal("200000");
-    // })
-    // it("Redeem", async () => {
-    //     const balBefore = await this.Unitroller.borrowCaps(owner.address)
-    //     const borrowCap = balBefore.toString();
+    const getSupplyRate = async () => {
+        const supplyRate = await this.CErc20Immutable.supplyRatePerBlock();
+        const blockPerYear = await this.JumpRateModelV4.blocksPerYear();
+        const _rate = parseFloat((supplyRate.mul(blockPerYear)).toString());
+        return _rate / e18;
+    }
 
-    //     // await this.CErc20Immutable.redeem(balBefore); 
-    //     // const balAfter = await this.CErc20Immutable.balanceOf(owner.address)
-    //     // console.log(balBefore.toString(), balAfter.toString());
-    // })
+    it("Mint", async () => {
+        await this.Usdc.approve(this.CErc20Immutable.address, "500000")
+        await this.CErc20Immutable.mint("500000");
+        const bal = await this.CErc20Immutable.balanceOf(owner.address)
+        expect(bal.toString()).is.equal("500000");
+    })
+    it("CollateralFactor", async () => {
+        const { collateralFactorMantissa } = await this.Unitroller.markets(this.CErc20Immutable.address);
+        expect(collateralFactorMantissa.toString()).is.equal(collateralFactorMantissa_);
+        console.log(`Collateral: ${ethers.utils.formatEther(collateralFactorMantissa)}`);
+    })
+    //above 80% of collateral borrow is not allowed
+    it("borrow Revert", async () => {
+        await expect(this.CErc20Immutable.borrow("400001"))
+            .to.be.revertedWithCustomError(this.CErc20Immutable, "BorrowComptrollerRejection");
+    })
+    it("borrow", async () => {
+        const balBefore = await this.Usdc.balanceOf(owner.address)
+        await this.CErc20Immutable.borrow("400000");
+        const bal = await this.Usdc.balanceOf(owner.address)
+        const borrowedBalance = await this.CErc20Immutable.borrowBalanceStored(owner.address);
+
+        expect(borrowedBalance.toString()).is.equal("400000");
+        expect(bal.sub(balBefore).toString()).is.equal("400000");
+    })
+    //getSupplyRate() function give annual return on Supplying the assets and this test increase time with 365 day and reedm the token
+    it("Redeem", async () => {
+        const amount = 500000;
+        await this.Usdc.connect(bidder1).approve(this.CErc20Immutable.address, amount)
+        await this.CErc20Immutable.connect(bidder1).mint(amount);
+        const bal = await this.CErc20Immutable.balanceOf(bidder1.address)
+        const balBefore = await this.CErc20Immutable.balanceOf(bidder1.address);
+        await increaseTime(365 * 86400); 
+        const rate = await getSupplyRate();
+        await this.CErc20Immutable.connect(bidder1).redeem(balBefore);
+        
+        const balAfter = await this.CErc20Immutable.balanceOf(bidder1.address)
+        const balAfterUsdc = parseInt(await this.Usdc.balanceOf(bidder1.address))
+        const amountReceivedAfterOneYear = amount*(1+ rate);
+        console.log(amountReceivedAfterOneYear, balAfterUsdc)
+        expect(amountReceivedAfterOneYear).to.be.closeTo(balAfterUsdc,0.1);
+        // console.log(balBefore.toString(), balAfter.toString());
+    })
 
 });
