@@ -48,10 +48,19 @@ describe("Lending Borrowing", () => {
         await this.Unitroller._supportMarket(this.CErc20Immutable.address);
         await this.Unitroller._setCollateralFactor(this.CErc20Immutable.address, collateralFactorMantissa_);
         await this.Usdc.transfer(bidder1.address, "500000");
+        await this.Usdc.transfer(bidder2.address, "513252");
+        await this.Usdc.transfer(bidder3.address, "500000");
     })
 
     const getSupplyRate = async () => {
         const supplyRate = await this.CErc20Immutable.supplyRatePerBlock();
+        const blockPerYear = await this.JumpRateModelV4.blocksPerYear();
+        const _rate = parseFloat((supplyRate.mul(blockPerYear)).toString());
+        return _rate / e18;
+    }
+
+    const getBorrowRatePerBlock = async () => {
+        const supplyRate = await this.CErc20Immutable.borrowRatePerBlock();
         const blockPerYear = await this.JumpRateModelV4.blocksPerYear();
         const _rate = parseFloat((supplyRate.mul(blockPerYear)).toString());
         return _rate / e18;
@@ -63,10 +72,13 @@ describe("Lending Borrowing", () => {
         const bal = await this.CErc20Immutable.balanceOf(owner.address)
         expect(bal.toString()).is.equal("500000");
     })
+    it("Supply Balance", async () => {
+        const supplyBalance = (await this.CErc20Immutable.getAccountSnapshot(owner.address))[1];
+        expect(supplyBalance.toString()).is.equal("500000");
+    })
     it("CollateralFactor", async () => {
         const { collateralFactorMantissa } = await this.Unitroller.markets(this.CErc20Immutable.address);
-        expect(collateralFactorMantissa.toString()).is.equal(collateralFactorMantissa_);
-        console.log(`Collateral: ${ethers.utils.formatEther(collateralFactorMantissa)}`);
+        expect(collateralFactorMantissa.toString()).is.equal(collateralFactorMantissa_); 
     })
     //above 80% of collateral borrow is not allowed
     it("borrow Revert", async () => {
@@ -81,6 +93,7 @@ describe("Lending Borrowing", () => {
 
         expect(borrowedBalance.toString()).is.equal("400000");
         expect(bal.sub(balBefore).toString()).is.equal("400000");
+        
     })
     //getSupplyRate() function give annual return on Supplying the assets and this test increase time with 365 day and reedm the token
     it("Redeem", async () => {
@@ -92,13 +105,44 @@ describe("Lending Borrowing", () => {
         await increaseTime(365 * 86400); 
         const rate = await getSupplyRate();
         await this.CErc20Immutable.connect(bidder1).redeem(balBefore);
-        
-        const balAfter = await this.CErc20Immutable.balanceOf(bidder1.address)
+         
         const balAfterUsdc = parseInt(await this.Usdc.balanceOf(bidder1.address))
-        const amountReceivedAfterOneYear = amount*(1+ rate);
-        console.log(amountReceivedAfterOneYear, balAfterUsdc)
+        const amountReceivedAfterOneYear = amount*(1+ rate); 
         expect(amountReceivedAfterOneYear).to.be.closeTo(balAfterUsdc,0.1);
         // console.log(balBefore.toString(), balAfter.toString());
     })
+ 
+    it("Repay Borrow", async () => {
+        const borrowedAmount = 200000;
+        await this.Usdc.connect(bidder2).approve(this.CErc20Immutable.address, "500000")
+        await this.CErc20Immutable.connect(bidder2).mint("500000");
+        
+        await this.CErc20Immutable.connect(bidder2).borrow(borrowedAmount);
+        await this.Usdc.connect(bidder2).approve(this.CErc20Immutable.address, "5000000000000000000")
+        
+        const borrowRate = await getBorrowRatePerBlock(); 
+        await increaseTime(365 * 86400); 
+        await this.CErc20Immutable.accrueInterest(); 
+        const borrowedBalance = parseInt((await this.CErc20Immutable.borrowBalanceStored(bidder2.address)).toString());
+        
+        const repayAmount = borrowedAmount * (1 + borrowRate);   
+        expect(repayAmount).to.be.closeTo(borrowedBalance,1);
+        await this.CErc20Immutable.connect(bidder2).repayBorrow(borrowedBalance); 
+        const borrow1 = await this.CErc20Immutable.borrowBalanceStored(bidder2.address);
+        
+        expect(borrow1.toString()).is.equal("0");
+    })
 
+    it("Liquidation", async () => {
+        const borrowedAmount = 40001;
+        await this.Usdc.connect(bidder3).approve(this.CErc20Immutable.address, "500000")
+        await this.CErc20Immutable.connect(bidder3).mint("500000");
+        await this.CErc20Immutable.connect(bidder3).borrow(borrowedAmount);
+        let borrow = await this.CErc20Immutable.borrowBalanceStored(bidder3.address);
+        await this.CErc20Immutable.connect(bidder3).liquidateBorrow(bidder3.address, borrow, this.CErc20Immutable.address);
+        borrow = await this.CErc20Immutable.borrowBalanceStored(bidder3.address);
+        
+        console.log(borrow.toString());
+    })
+    
 });

@@ -6,7 +6,8 @@ import "./CTokenInterfaces.sol";
 import "./ErrorReporter.sol";
 import "./EIP20Interface.sol";
 import "./InterestRateModel.sol";
-import "./ExponentialNoError.sol";
+import "./ExponentialNoError.sol"; 
+import "hardhat/console.sol";
 
 /**
  * @title Compound's CToken Contract
@@ -842,6 +843,7 @@ abstract contract CToken is
          *  totalBorrowsNew = totalBorrows - actualRepayAmount
          */
         uint256 accountBorrowsNew = accountBorrowsPrev - actualRepayAmount;
+        console.log(accountBorrowsPrev, repayAmountFinal, actualRepayAmount);
         uint256 totalBorrowsNew = totalBorrows - actualRepayAmount;
 
         /* We write the previously calculated values into storage */
