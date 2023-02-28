@@ -21,6 +21,32 @@ contract VesterSale is Vester {
         immediateClaimmed = false;
     }
 
+    function getUnlockedAmountClaimableAmount()
+        public 
+        view
+        returns (uint256 amount)
+    {   
+        uint256 blockTimestamp = getBlockTimestamp();
+        if(blockTimestamp < vestingBegin) return 0; 
+        uint256 currentPoint = vestingCurve(
+            (blockTimestamp - vestingBegin).mul(1e18).div(
+                vestingEnd - vestingBegin
+            )
+        );
+        amount = vestingAmount
+            .mul(currentPoint.sub(previousPoint))
+            .div(finalPoint)
+            .mul(5)
+            .div(10);
+        if(!immediateClaimmed) { 
+            amount = amount.add(immediateClaimableAmount);
+        }
+        if (previousPoint == 0 && currentPoint > 0) {
+            // distribute 50% on TGE
+            amount = amount.add(vestingAmount.div(2));
+        } 
+    }
+
     function getUnlockedAmount()
         internal
         virtual

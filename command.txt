@@ -1,37 +1,37 @@
 
 Usdc
-npx hardhat verify 0x5FbDB2315678afecb367f032d93F642f64180aa3 --network hardhat
+npx hardhat verify 0xDDFb1fC22967155D17A0A153697Cf55685E7B51f --network bsctestnet
 Velo
-npx hardhat verify 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 --network hardhat
+npx hardhat verify 0x93B0Faac338880629683Da6a29908ab38835Ab96 --network bsctestnet
 PairFactory
-npx hardhat verify 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 --network hardhat
+npx hardhat verify 0x779bA796DfE898005241d8Ee0B596F32B5528c3A --network bsctestnet
 GaugeFactory
-npx hardhat verify 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9 --network hardhat
+npx hardhat verify 0x709A5622438a94E2c78749750f6f5EAfbfCe6476 --network bsctestnet
 BribeFactory
-npx hardhat verify 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707 --network hardhat
+npx hardhat verify 0x58cc552D5eCb17EF7B17Fbe1B04832259A363a01 --network bsctestnet
 VeArtProxy
-npx hardhat verify 0x0165878A594ca255338adfa4d48449f69242Eb8F --network hardhat
+npx hardhat verify 0x4D715f8fA1Edf0e5f3B9a5b6DAb958d944ebE8a1 --network bsctestnet
 VotingEscrow
-npx hardhat verify --constructor-args VotingEscrow.js 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853 --network hardhat
+npx hardhat verify --constructor-args VotingEscrow.js 0xDA66866BD4D9a0eF788e6aBEAA67343476528800 --network bsctestnet
 PairFactory
-npx hardhat verify 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6 --network hardhat
+npx hardhat verify 0xA579f5dCaDCa46fC585562633405a5b322B7EC57 --network bsctestnet
 BribeFactory
-npx hardhat verify 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318 --network hardhat
+npx hardhat verify 0x2530fA09803531e218c279f9228095b44AF7B06E --network bsctestnet
 Voter
-npx hardhat verify --constructor-args Voter.js 0x610178dA211FEF7D417bC0e6FeD39F05609AD788 --network hardhat
+npx hardhat verify --constructor-args Voter.js 0x3506Ac18d0bc1B42899465BB81a860CE85A20050 --network bsctestnet
 RewardsDistributor
-npx hardhat verify --constructor-args RewardsDistributor.js 0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e --network hardhat
+npx hardhat verify --constructor-args RewardsDistributor.js 0xf7C1bCB42F7927264b91E7B798f93e1DC76682e9 --network bsctestnet
 Minter
-npx hardhat verify --constructor-args Minter.js 0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0 --network hardhat
+npx hardhat verify --constructor-args Minter.js 0x7E0f54abCD2a5AD53E1D4720B7DE42984569Ed24 --network bsctestnet
 WETH9
-npx hardhat verify 0x9A676e781A523b5d0C0e43731313A708CB607508 --network hardhat
+npx hardhat verify 0xF1b0D955E97f13EBD5Ed882C7586846a2e4C1358 --network bsctestnet
 Router
-npx hardhat verify --constructor-args Router.js 0x0B306BF915C4d645ff596e518fAf3F9669b97016 --network hardhat
+npx hardhat verify --constructor-args Router.js 0x878b98293D77b8951D6b67732c78065bf76B1E71 --network bsctestnet
 Sonne
-npx hardhat verify --constructor-args Sonne.js 0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1 --network hardhat
+npx hardhat verify --constructor-args Sonne.js 0x4AE29E2d22F379679FEc7BB0F58C10982b3a4E20 --network bsctestnet
 VesterSale
-npx hardhat verify --constructor-args VesterSale.js 0x3Aa5ebB10DC797CAC828524e59A333d0A371443c --network hardhat
+npx hardhat verify --constructor-args VesterSale.js 0xDFF422961fBf1A842539c02E08Db76E77f95d31C --network bsctestnet
 OwnedDistributor
-npx hardhat verify --constructor-args OwnedDistributor.js 0xc6e7DF5E7b4f2A278906862b61205850344D4e7d --network hardhat
+npx hardhat verify --constructor-args OwnedDistributor.js 0x4e7CAdd9d9C61e3047f1c2E169ad53590995d66b --network bsctestnet
 LiquidityGenerator
-npx hardhat verify --constructor-args LiquidityGenerator.js 0x59b670e9fA9D0A427751Af201D676719a970857b --network hardhat
+npx hardhat verify --constructor-args LiquidityGenerator.js 0x9C1D3695fD7F2607C4bc6B30223EaF0AF38e78Ef --network bsctestnet
