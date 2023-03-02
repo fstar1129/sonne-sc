@@ -63,8 +63,10 @@ async function main() {
     let vestingAmount = LGEAmount.mul(VESTINGAMOUNT_PERCENTAGE).div(HUNDRED);
     let PAIRED_AMOUNT = TOTAL_SUPPLY.mul(PAIRED_WITH_PERCENTAGE).div(HUNDRED);
     const oneDay = 86400;
+    const oneHours = 60 * 60;
 
-    const periodDuration_ = oneDay * 3;
+    // const periodDuration_ = oneDay * 3;
+    const periodDuration_ = oneHours / 2;
     const vestingPeriod = oneDay * 30 * 3;// 3 Months
     const periodStart = await getCurrentTimeStamp();
     const periodEnd = periodStart + periodDuration_;
