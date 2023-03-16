@@ -1,0 +1,1 @@
+module.exports = [["soUSDC"],["0x90c069C4538adAc136E051052E14c1cD799C41B7"],["1000000"]]

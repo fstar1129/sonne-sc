@@ -1,0 +1,13 @@
+
+Unitroller
+npx hardhat verify 0x1974B378Ba7e6aA61FD042aa1e899969EC21ADDb --network bsctestnet
+Comptroller
+npx hardhat verify 0x88853946FBd9550cECCE2B7DBb5Dc9CD134C02F4 --network bsctestnet
+ChainlinkPriceOracle
+npx hardhat verify --constructor-args ChainlinkPriceOracle.js 0x2BDaB570e715A2AEb28f57D1B8847B4211D7558C --network bsctestnet
+JumpRateModelV4
+npx hardhat verify --constructor-args JumpRateModelV4.js 0x3f7748c1A794ea85A63AcE1719C183C3c472288f --network bsctestnet
+Usdc
+npx hardhat verify 0x15b41de7E1Ba0a46f2ab862C789db2AD6B46ccc2 --network bsctestnet
+CErc20Immutable
+npx hardhat verify --constructor-args CErc20Immutable.js 0xD7D828f65E69536C9898A4fDa1FeE0741298f5c0 --network bsctestnet
